@@ -1,8 +1,19 @@
 import { defineConfig } from 'vite'
+import { readdirSync } from 'fs'
+import { resolve } from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
+
+const htmlInputs = Object.fromEntries(
+  readdirSync(__dirname)
+    .filter((f) => f.endsWith('.html'))
+    .map((f) => [f.replace(/\.html$/, ''), resolve(__dirname, f)])
+)
 
 export default defineConfig({
   root: '.',
-  publicDir: false,
+  publicDir: 'public',
   server: {
     port: 5173,
     open: true,
@@ -10,9 +21,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     rollupOptions: {
-      input: {
-        main: 'index.html',
-      },
+      input: htmlInputs,
     },
+    emptyOutDir: true,
   },
 })

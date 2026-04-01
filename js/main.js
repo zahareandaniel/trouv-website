@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const scrollThreshold = 60;
 
   function handleScroll() {
+    if (!header) return;
     if (window.scrollY > scrollThreshold) {
       header.classList.add('site-header--scrolled');
     } else {
@@ -42,22 +43,41 @@ document.addEventListener('DOMContentLoaded', () => {
   // ---------- Scroll Reveal Animations ----------
   const revealElements = document.querySelectorAll('.reveal, .reveal-stagger');
 
-  const revealObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      threshold: 0.15,
-      rootMargin: '0px 0px -40px 0px',
-    }
-  );
+  const revealObserver =
+    'IntersectionObserver' in window
+      ? new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
+              }
+            });
+          },
+          {
+            threshold: 0.08,
+            rootMargin: '0px 0px 0px 0px',
+          }
+        )
+      : null;
 
-  revealElements.forEach(el => revealObserver.observe(el));
+  const markRevealVisibleIfInView = (el) => {
+    const rect = el.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    return rect.top < vh * 0.95 && rect.bottom > 0;
+  };
+
+  revealElements.forEach((el) => {
+    if (!revealObserver) {
+      el.classList.add('visible');
+      return;
+    }
+    if (markRevealVisibleIfInView(el)) {
+      el.classList.add('visible');
+    } else {
+      revealObserver.observe(el);
+    }
+  });
 
   // ---------- Smooth Scroll for In-Page Links ----------
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
