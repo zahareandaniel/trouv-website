@@ -201,7 +201,7 @@
           // Anthropic streaming event
           if (json.type === 'content_block_delta' && json.delta?.type === 'text_delta') {
             fullText += json.delta.text;
-            bubble.textContent = fullText;
+            bubble.innerHTML = renderText(fullText);
             scrollBottom(msgsEl);
           }
         } catch { /* skip malformed chunks */ }
@@ -212,9 +212,19 @@
   }
 
   // ── Append a complete message ────────────────────────────
+  // Convert basic markdown to HTML
+  function renderText(text) {
+    return text
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>');
+  }
+
   function appendMessage(role, text, msgsEl) {
     const msgEl  = el('div', { class: `trouv-msg trouv-msg--${role}` });
-    const bubble = el('div', { class: 'trouv-msg__bubble' }, text);
+    const bubble = el('div', { class: 'trouv-msg__bubble' });
+    bubble.innerHTML = renderText(text);
     const timeEl = el('div', { class: 'trouv-msg__time' }, now());
     msgEl.appendChild(bubble);
     msgEl.appendChild(timeEl);
