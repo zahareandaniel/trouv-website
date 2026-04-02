@@ -6,10 +6,16 @@
   "cleanUrls": true,
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/(.*)",
       "has": [{ "type": "host", "value": "trouv.co.uk" }],
-      "destination": "https://www.trouv.co.uk/:path*",
+      "destination": "https://www.trouv.co.uk/$1",
       "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/page-sitemap.xml",
+      "destination": "/sitemap.xml"
     }
   ]
 }

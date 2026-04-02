@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://www.trouv.co.uk/sitemap.xml
+Sitemap: https://www.trouv.co.uk/sitemap_index.xml
