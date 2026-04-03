@@ -218,6 +218,89 @@ section {
   margin-bottom: 1.25rem;
 }
 
+/* One-line SEO support copy under airport heroes — discreet typography */
+.airport-seo-line {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--grey-500);
+  text-align: center;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: clamp(8px, 1.5vw, 14px) 0 clamp(4px, 1vw, 10px);
+}
+
+.airport-cred-line {
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--grey-500);
+  text-align: center;
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 0 0 clamp(10px, 2vw, 18px);
+}
+
+.airport-micro-faq {
+  padding: clamp(40px, 5vw, 64px) 0;
+  border-top: var(--border-light);
+}
+
+.airport-micro-faq__title {
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  font-weight: var(--fw-semibold);
+  text-align: center;
+  margin: 0 auto clamp(1.25rem, 3vw, 2rem);
+  max-width: 40rem;
+  line-height: 1.35;
+}
+
+.airport-micro-faq__list {
+  max-width: 38rem;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.airport-micro-faq__list dt {
+  font-size: 0.78rem;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--grey-600);
+  margin: 0 0 0.35rem;
+}
+
+.airport-micro-faq__list dd {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--grey-600);
+  margin: 0 0 1.15rem;
+  padding: 0;
+}
+
+.airport-micro-faq__list dd:last-of-type {
+  margin-bottom: 0;
+}
+
+.home-value-prop {
+  padding: clamp(48px, 6vw, 80px) 0;
+  border-top: var(--border-light);
+  background-color: var(--white);
+}
+
+.home-value-prop .section-heading > p:first-of-type {
+  max-width: 34rem;
+  margin-left: auto;
+  margin-right: auto;
+  color: var(--grey-600);
+}
+
+.home-value-prop__proof {
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--grey-500);
+  max-width: 36rem;
+  margin: 1.5rem auto 0;
+}
+
 /* ---------- Buttons ---------- */
 .btn {
   display: inline-flex;
