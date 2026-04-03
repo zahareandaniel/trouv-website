@@ -239,6 +239,81 @@ section {
   padding: 0 0 clamp(10px, 2vw, 18px);
 }
 
+.airport-cred-line--in-pricing {
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--grey-600);
+  font-weight: var(--fw-medium);
+  text-align: center;
+  max-width: 44rem;
+  margin: 0 auto 0.25rem;
+  padding: 0;
+}
+
+.airport-how-works {
+  padding: clamp(40px, 5vw, 64px) 0;
+  border-top: var(--border-light);
+  background-color: var(--white);
+}
+
+.airport-how-works__title {
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  font-weight: var(--fw-semibold);
+  text-align: center;
+  margin: 0 auto clamp(1.35rem, 3vw, 2rem);
+  line-height: 1.35;
+}
+
+.airport-how-works__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(20px, 3vw, 40px);
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.airport-how-works__steps > li {
+  margin: 0;
+  padding: 0;
+}
+
+.airport-how-works__steps > li + li {
+  border-top: 1px solid var(--grey-100);
+  padding-top: 1rem;
+}
+
+@media (min-width: 769px) {
+  .airport-how-works__steps > li + li {
+    border-top: none;
+    padding-top: 0;
+  }
+}
+
+.airport-how-works__step-title {
+  font-size: 0.78rem;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--dark);
+  margin: 0 0 0.5rem;
+}
+
+.airport-how-works__step-text {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--grey-600);
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .airport-how-works__steps {
+    grid-template-columns: 1fr;
+  }
+}
+
 .airport-micro-faq {
   padding: clamp(40px, 5vw, 64px) 0;
   border-top: var(--border-light);
