@@ -250,6 +250,18 @@ section {
   padding: 0;
 }
 
+/* Airport pricing band only: tighten gap before fare list */
+.section--grey:has(.heathrow-pricing) > .container > .section-heading.text-center {
+  text-align: center;
+  margin-bottom: clamp(18px, 3vw, 28px);
+}
+
+.section--grey:has(.heathrow-pricing) > .container > .section-heading.text-center h2 {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
 .airport-how-works {
   padding: clamp(40px, 5vw, 64px) 0;
   border-top: var(--border-light);
@@ -273,6 +285,7 @@ section {
   gap: clamp(20px, 3vw, 40px);
   max-width: 960px;
   margin: 0 auto;
+  text-align: center;
 }
 
 .airport-how-works__steps > li {
@@ -658,16 +671,23 @@ section {
 }
 
 .heathrow-pricing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
   font-size: 1.05rem;
   line-height: 2;
   color: var(--grey-600);
   margin: 0 auto;
   padding-bottom: clamp(8px, 2vw, 16px);
+  max-width: 36rem;
 }
 
 .heathrow-pricing p {
   margin: 0;
+  text-align: center;
+  width: 100%;
+  max-width: 36rem;
 }
 
 .trust-signals--compact .trust-signals__item {
@@ -1249,12 +1269,17 @@ section {
 
 .cta-banner h2 {
   margin-bottom: 1.2rem;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 48rem;
 }
 
 .cta-banner p {
   color: var(--grey-300);
   margin: 0 auto 2.5rem;
   font-size: 1.05rem;
+  max-width: 36rem;
+  text-align: center;
 }
 
 /* ---------- Airport List ---------- */
@@ -1508,16 +1533,33 @@ section {
   position: relative;
   z-index: 2;
   color: var(--white);
+  text-align: center;
 }
 
 .page-header__content h1 {
   margin-bottom: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 920px;
 }
 
 .page-header__content p {
   color: rgba(255, 255, 255, 0.7);
   font-size: 1.05rem;
   max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-header--legal .page-header__content {
+  text-align: left;
+}
+
+.page-header--legal .page-header__content h1,
+.page-header--legal .page-header__content p {
+  margin-left: 0;
+  margin-right: 0;
+  max-width: none;
 }
 
 /* ---------- Prose Content ---------- */
