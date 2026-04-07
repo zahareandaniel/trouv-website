@@ -58,6 +58,7 @@ export default async function handler(req) {
   const resendApiKey = process.env.RESEND_API_KEY;
   const toEmail = (process.env.CONTACT_TO_EMAIL || 'info@trouv.co.uk').trim();
   const fromEmail = (process.env.CONTACT_FROM_EMAIL || '').trim();
+  const googleMapsKey = process.env.GOOGLE_MAPS_API_KEY;
 
   try {
     const { messages } = await req.json();
@@ -69,9 +70,6 @@ export default async function handler(req) {
       });
     }
 
-    // ==========================================
-    // ⬇️ PRICING FORMULA & SYSTEM PROMPT ⬇️
-    // ==========================================
     const systemPrompt = `
 You are the official digital concierge for 'Trouv', a premium luxury chauffeur service based in Mayfair, London.
 You communicate in British English. Your tone is highly professional, discreet, elegant, and helpful.
@@ -83,21 +81,10 @@ TROUV CHAUFFEURS – PRICING & DISPATCH INSTRUCTIONS
 VEHICLE CAPACITY RULE
 Passenger and luggage capacity must always be respected.
 
-Mercedes-Benz E-Class
-1–3 passengers
-Up to 2 large suitcases and 2 small
-
-Mercedes-Benz S-Class
-1–3 passengers
-Up to 2 large suitcases and 2 small
-
-Mercedes-Benz V-Class
-4–7 passengers
-Up to 6 large suitcases and 3 small
-
-Range Rover Autobiography
-1–3 passengers
-Up to 3 large suitcases and 1 small
+Mercedes-Benz E-Class: 1–3 passengers. Up to 2 large suitcases and 2 small
+Mercedes-Benz S-Class: 1–3 passengers. Up to 2 large suitcases and 2 small
+Mercedes-Benz V-Class: 4–7 passengers. Up to 6 large suitcases and 3 small
+Range Rover Autobiography: 1–3 passengers. Up to 3 large suitcases and 1 small
 
 ---
 CRITICAL VEHICLE LOGIC
@@ -146,37 +133,20 @@ Range Rover → £180 + VAT
 CENTRAL LONDON DEFINITION
 Central London includes (but not limited to):
 SW1, W1, WC1, WC2, EC1, EC2, EC3, EC4, SE1, SW3, SW7, W8, W2, SW10, W11, W9, SE1,SE11,SW8,SW11,SW18
-
 If pickup OR drop-off is within these → Fixed Pricing applies
 
 ---
 AIRPORT DISTANCE PRICING (Non-Central London)
-Use this ONLY if:
-Journey involves an airport AND location is NOT Central London
-
-Minimum Charge
-£120 + VAT (includes first 5 miles)
+Use this ONLY if: Journey involves an airport AND location is NOT Central London
+Minimum Charge: £120 + VAT (includes first 5 miles)
 
 Per-Mile Rates
-E-Class
-5–50 miles → £3 per mile
-50+ miles → £2.5 per mile
-
-S-Class / V-Class
-5–50 miles → £4 per mile
-50+ miles → £3.5 per mile
-
-Range Rover
-5–50 miles → £5.5 per mile
-50+ miles → £4.5 per mile
+E-Class: 5–50 miles → £3 per mile. 50+ miles → £2.5 per mile
+S-Class / V-Class: 5–50 miles → £4 per mile. 50+ miles → £3.5 per mile
+Range Rover: 5–50 miles → £5.5 per mile. 50+ miles → £4.5 per mile
 
 FORMULA (CRITICAL)
-Airport Distance Pricing:
-Final price = minimum charge + ((total miles - 5) × per-mile rate)
-Example (V-Class): 28 miles total
-= £120 + ((28 - 5) × £4)
-= £120 + £92
-= £212 + VAT
+Airport Distance Pricing: Final price = minimum charge + ((total miles - 5) × per-mile rate)
 
 ---
 STANDARD DISTANCE PRICING (No Airport)
@@ -189,38 +159,21 @@ Range Rover → £150 + VAT
 (includes first 10 miles)
 
 Per-Mile Rates
-E-Class
-10–50 miles → £3 per mile
-50+ miles → £2.5 per mile
-
-S-Class / V-Class
-10–50 miles → £4 per mile
-50+ miles → £3.5 per mile
-
-Range Rover
-10–50 miles → £5.5 per mile
-50+ miles → £4.5 per mile
+E-Class: 10–50 miles → £3 per mile. 50+ miles → £2.5 per mile
+S-Class / V-Class: 10–50 miles → £4 per mile. 50+ miles → £3.5 per mile
+Range Rover: 10–50 miles → £5.5 per mile. 50+ miles → £4.5 per mile
 
 FORMULA
-Standard Pricing:
-Final price = minimum charge + ((total miles - 10) × per-mile rate)
+Standard Pricing: Final price = minimum charge + ((total miles - 10) × per-mile rate)
 
 ---
-DISTANCE CALCULATION RULE
-Always use Google Maps distance
-If distance is in km → convert to miles (1 km = 0.621371 miles)
+DISTANCE CALCULATION RULE (CRITICAL)
+If you need to calculate a distance to provide a quote, you MUST use the 'get_driving_distance' tool to obtain the exact driving mileage.
+Do NOT estimate the distance using your internal knowledge. Always use the tool.
 
 ---
 ROUNDING RULE
 Always round final price to nearest whole pound. Never show decimals.
-
----
-HOURLY HIRE
-Minimum booking: 4 hours
-E-Class → £50 + VAT/hour
-S-Class → £75 + VAT/hour
-V-Class → £75 + VAT/hour
-Range Rover → £100 + VAT/hour
 
 ---
 PRICING SELECTION LOGIC (VERY IMPORTANT)
@@ -233,39 +186,23 @@ PRICING SELECTION LOGIC (VERY IMPORTANT)
 ---
 FINAL RULES
 Always follow vehicle capacity rules
-Always follow pricing selection logic
 Never mix pricing models
 Never override fixed pricing
-Never estimate if a rule exists
 Always return price as: £X + VAT
-
----
-AI INSTRUCTIONS
-1. Identify airport involvement
-2. Detect Central London postcode
-3. Select correct pricing model
-4. Select correct vehicle
-5. Calculate correct price
-6. If vehicle unclear → ask
-7. If vehicle clear → do NOT ask
 
 ---
 LEAD CAPTURE INSTRUCTIONS (CRITICAL)
 Your job is to act as a quoting bot AND a lead capturer.
-1. You must detect the user's intent (quote, booking, amendment, question).
-2. You must detect and extract: pickup, dropoff, date/time, passengers, luggage, vehicle preference, and flight/train number (if airport).
-3. If the user expresses intent to proceed with a booking or a quote (e.g., "arrange it", "yes", "book it"), you MUST politely ask for their Name and Email address (or Phone number) if you do not have it yet.
-4. Do NOT ask for contact info too early. Wait until they accept the quote or ask to book.
-5. ONCE you have BOTH the full journey details AND their contact details, you MUST trigger the 'submit_lead_to_team' tool to send the information.
+1. Detect and extract: pickup, dropoff, date/time, passengers, luggage, vehicle preference, flight/train number (if airport).
+2. If the user expresses intent to proceed with a booking (e.g., "arrange it", "yes", "book it"), politely ask for their Name and Email address (or Phone number) if missing.
+3. ONCE you have BOTH the full journey details AND their contact details, you MUST trigger the 'submit_lead_to_team' tool.
 
 ---
 WHATSAPP STYLE RULE
-Write naturally, not like a form
-Keep it concise and premium
-No repetition
-No robotic tone
+Write naturally, not like a form.
+Keep it concise and premium.
 NEVER show the calculation steps or breakdown. ONLY provide the final calculated price.
-NEVER explicitly mention the names of our pricing policies (e.g., do not say "I am using Standard Distance Pricing" or "Fixed Pricing applies here"). Just seamlessly provide the quote.
+NEVER explicitly mention the names of our pricing policies (e.g., do not say "I am using Standard Distance Pricing"). Just seamlessly provide the quote.
 
 ---
 FORMAT
@@ -273,17 +210,15 @@ Pickup to Drop-off on date at time in a vehicle for X passengers with X luggage 
 
 ---
 CRITICAL SYSTEM NOTE (FOR AI INTEGRATION)
-Price must be calculated externally when possible
-AI must NOT invent or estimate pricing
-Always prioritise pricing rules above
-CRITICAL: Do NOT show the client the math formula (e.g., £X + (Y miles * £Z)). Do the calculation internally and ONLY output the final price.
+Price must be calculated externally when possible. AI must NOT invent pricing.
+CRITICAL: Do NOT show the client the math formula (e.g., £X + (Y miles * £Z)).
 `;
 
-    const openAiMessages = [
+    let currentMessages = [
       { role: 'system', content: systemPrompt },
       ...messages.map((m) => ({
         role: m.role,
-        content: m.content.slice(0, 500), // security max length
+        content: m.content.slice(0, 500),
       })),
     ];
 
@@ -292,121 +227,187 @@ CRITICAL: Do NOT show the client the math formula (e.g., £X + (Y miles * £Z)).
         type: 'function',
         function: {
           name: 'submit_lead_to_team',
-          description: 'Submit the final booking or quote request to the dispatch team once the user has provided their contact details and agreed to proceed.',
+          description: 'Submit the final booking request to the dispatch team once the user has provided their contact details and agreed to proceed.',
           parameters: {
             type: 'object',
             properties: {
-              intent: { type: 'string', description: 'The detected intent: quote, booking, amendment, or question' },
-              name: { type: 'string', description: 'The name of the client' },
-              contact: { type: 'string', description: 'The email or phone number of the client' },
-              pickup: { type: 'string', description: 'The pickup location' },
-              dropoff: { type: 'string', description: 'The drop-off location' },
-              datetime: { type: 'string', description: 'The date and time of the journey' },
-              passengers: { type: 'string', description: 'Number of passengers' },
-              luggage: { type: 'string', description: 'Amount and type of luggage' },
-              vehicle: { type: 'string', description: 'The chosen vehicle (S-Class, V-Class, etc.)' },
-              flight_number: { type: 'string', description: 'Flight or train number, if applicable' },
-              price_quoted: { type: 'string', description: 'The exact price you quoted the client' },
-              message: { type: 'string', description: 'Any extra notes or special requests from the client' }
+              intent: { type: 'string' },
+              name: { type: 'string' },
+              contact: { type: 'string' },
+              pickup: { type: 'string' },
+              dropoff: { type: 'string' },
+              datetime: { type: 'string' },
+              passengers: { type: 'string' },
+              luggage: { type: 'string' },
+              vehicle: { type: 'string' },
+              flight_number: { type: 'string' },
+              price_quoted: { type: 'string' },
+              message: { type: 'string' }
             },
             required: ['intent', 'name', 'contact', 'pickup', 'dropoff', 'datetime', 'passengers', 'vehicle', 'price_quoted']
+          }
+        }
+      },
+      {
+        type: 'function',
+        function: {
+          name: 'get_driving_distance',
+          description: 'Get the exact driving distance in miles between two locations. Use this before calculating any quote that relies on distance based pricing.',
+          parameters: {
+            type: 'object',
+            properties: {
+              origin: { type: 'string', description: 'The pickup location address or city' },
+              destination: { type: 'string', description: 'The drop-off location address or city' }
+            },
+            required: ['origin', 'destination']
           }
         }
       }
     ];
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: openAiMessages,
-        tools: tools,
-        tool_choice: 'auto',
-        temperature: 0.7,
-        max_tokens: 400,
-      }),
-    });
+    let maxCalls = 5;
+    let finalResponseText = '';
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('OpenAI Error Details:', errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
+    while (maxCalls > 0) {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: currentMessages,
+          tools: tools,
+          tool_choice: 'auto',
+          temperature: 0.7,
+          max_tokens: 400,
+        }),
+      });
 
-    const data = await response.json();
-    const responseMessage = data.choices[0].message;
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('OpenAI Error Details:', errorText);
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
 
-    // Check if AI decided to submit the lead via our tool
-    if (responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
-      const toolCall = responseMessage.tool_calls[0];
-      
-      if (toolCall.function.name === 'submit_lead_to_team') {
-        const args = JSON.parse(toolCall.function.arguments);
+      const data = await response.json();
+      const responseMessage = data.choices[0].message;
 
-        // Ensure email delivery is configured
-        if (!resendApiKey || !fromEmail) {
-           return new Response(JSON.stringify({ 
-             reply: "Thank you for confirming. However, our email system is not currently configured, so I could not forward your request. Please email us directly at info@trouv.co.uk." 
-           }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
+      currentMessages.push(responseMessage);
+
+      if (responseMessage.tool_calls && responseMessage.tool_calls.length > 0) {
+        let allToolsExecuted = true;
+
+        for (const toolCall of responseMessage.tool_calls) {
+          if (toolCall.function.name === 'submit_lead_to_team') {
+            const args = JSON.parse(toolCall.function.arguments);
+
+            if (!resendApiKey || !fromEmail) {
+              return new Response(JSON.stringify({ 
+                reply: "Thank you for confirming. However, our email system is not currently configured, so I could not forward your request. Please email us directly at info@trouv.co.uk." 
+              }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
+            }
+
+            const html = `<h2>New AI Chat Lead</h2>
+            <p><b>Name:</b> ${esc(args.name)}</p>
+            <p><b>Contact Info:</b> ${esc(args.contact)}</p>
+            <hr/>
+            <p><b>Pickup:</b> ${esc(args.pickup)}</p>
+            <p><b>Drop-off:</b> ${esc(args.dropoff)}</p>
+            <p><b>Date/Time:</b> ${esc(args.datetime)}</p>
+            <p><b>Flight Number:</b> ${esc(args.flight_number || 'N/A')}</p>
+            <hr/>
+            <p><b>Vehicle:</b> ${esc(args.vehicle)}</p>
+            <p><b>Passengers:</b> ${esc(args.passengers)}</p>
+            <p><b>Luggage:</b> ${esc(args.luggage || 'N/A')}</p>
+            <p><b>Quoted Price:</b> ${esc(args.price_quoted)}</p>
+            <hr/>
+            <p><b>Extra Notes:</b> ${esc(args.message || 'None')}</p>`;
+
+            const resEmail = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${resendApiKey}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                from: fromEmail,
+                to: [toEmail],
+                reply_to: args.contact && args.contact.includes('@') ? args.contact : undefined,
+                subject: `Trouv AI Chat Lead - ${args.name}`,
+                html: html,
+              }),
+            });
+
+            if (!resEmail.ok) {
+              console.error("Resend delivery failed", await resEmail.text());
+              return new Response(JSON.stringify({ 
+                reply: "Your details have been collected, but there was an issue reaching our dispatch. Please email info@trouv.co.uk so we do not miss your request." 
+              }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
+            }
+
+            return new Response(JSON.stringify({ 
+              reply: "Excellent. I have collected all your details and securely forwarded them to our dispatch team. They will review your request and be in touch shortly to confirm your booking. Have a wonderful day!" 
+            }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
+
+          } else if (toolCall.function.name === 'get_driving_distance') {
+            const args = JSON.parse(toolCall.function.arguments);
+            let distanceResult = "Error: Distance calculation failed.";
+
+            if (googleMapsKey) {
+              try {
+                const mapsUrl = `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${encodeURIComponent(args.origin)}&destinations=${encodeURIComponent(args.destination)}&key=${googleMapsKey}`;
+                const mapsRes = await fetch(mapsUrl);
+                const mapsData = await mapsRes.json();
+                
+                if (mapsData.rows && mapsData.rows[0].elements && mapsData.rows[0].elements[0].status === 'OK') {
+                  distanceResult = mapsData.rows[0].elements[0].distance.text; // e.g. "45.2 mi"
+                } else {
+                  console.error("Google Maps API returned non-OK status or missing data:", JSON.stringify(mapsData));
+                  distanceResult = "Error: Could not find driving distance.";
+                }
+              } catch (e) {
+                console.error("Fetch to Google Maps API failed:", e);
+                distanceResult = "Error: Network request failed.";
+              }
+            } else {
+              distanceResult = "Error: GOOGLE_MAPS_API_KEY is not configured on the server.";
+            }
+
+            currentMessages.push({
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              name: toolCall.function.name,
+              content: JSON.stringify({ exact_driving_distance: distanceResult })
+            });
+
+            // Need to process next tool or loop again
+            allToolsExecuted = false;
+          }
+        }
+        
+        if (!allToolsExecuted) {
+          maxCalls--;
+          continue; // Loop again and let OpenAI generate a response based on the tool result
         }
 
-        // Build HTML Email
-        const html = `<h2>New AI Chat Lead</h2>
-        <p><b>Intent:</b> ${esc(args.intent)}</p>
-        <p><b>Name:</b> ${esc(args.name)}</p>
-        <p><b>Contact Info:</b> ${esc(args.contact)}</p>
-        <hr/>
-        <p><b>Pickup:</b> ${esc(args.pickup)}</p>
-        <p><b>Drop-off:</b> ${esc(args.dropoff)}</p>
-        <p><b>Date/Time:</b> ${esc(args.datetime)}</p>
-        <p><b>Flight Number:</b> ${esc(args.flight_number || 'N/A')}</p>
-        <hr/>
-        <p><b>Vehicle:</b> ${esc(args.vehicle)}</p>
-        <p><b>Passengers:</b> ${esc(args.passengers)}</p>
-        <p><b>Luggage:</b> ${esc(args.luggage || 'N/A')}</p>
-        <p><b>Quoted Price:</b> ${esc(args.price_quoted)}</p>
-        <hr/>
-        <p><b>Extra Notes:</b> ${esc(args.message || 'None')}</p>`;
-
-        const resEmail = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${resendApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            from: fromEmail,
-            to: [toEmail],
-            reply_to: args.contact.includes('@') ? args.contact : undefined,
-            subject: `Trouv AI Chat Lead - ${args.name}`,
-            html: html,
-          }),
-        });
-
-        if (!resEmail.ok) {
-          console.error("Resend delivery failed", await resEmail.text());
-          return new Response(JSON.stringify({ 
-            reply: "Your details have been collected, but there was an issue reaching our dispatch. Please email info@trouv.co.uk so we do not miss your request." 
-          }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
-        }
-
-        // Return success response to user
-        return new Response(JSON.stringify({ 
-          reply: "Excellent. I have collected all your details and securely forwarded them to our dispatch team. They will review your request and be in touch shortly to confirm your booking. Have a wonderful day!" 
-        }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
+      } else {
+        // No tool calls, AI returned normal text response
+        finalResponseText = responseMessage.content;
+        break;
       }
     }
 
-    // Standard text response if no tool is called
-    const replyText = responseMessage.content;
-    return new Response(JSON.stringify({ reply: replyText }), {
+    if (!finalResponseText) {
+      finalResponseText = "I apologize, but I encountered an error calculating the distance. Please email us at info@trouv.co.uk.";
+    }
+
+    return new Response(JSON.stringify({ reply: finalResponseText }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
     });
+
   } catch (error) {
     console.error('Chat API Error:', error);
     return new Response(
