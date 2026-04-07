@@ -3,8 +3,7 @@
    Premium · Minimal · Monochrome
    ============================================= */
 
-/* ---------- Google Fonts ---------- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+/* ---------- Typography (system stack — no third-party font requests) ---------- */
 
 /* ---------- CSS Custom Properties ---------- */
 :root {
@@ -27,7 +26,7 @@
   --white: #ffffff;
 
   /* Typography */
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-primary: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --fw-light: 300;
   --fw-regular: 400;
   --fw-medium: 500;
@@ -545,6 +544,73 @@ section {
 .site-header--scrolled .nav-links a:hover,
 .site-header--scrolled .nav-links a.active {
   color: var(--black);
+}
+
+/* Kill browser default blue/purple flash on nav (visited & active states) */
+.nav-links a:link,
+.nav-links a:visited {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.nav-links a:active {
+  color: var(--white);
+}
+
+.site-header--scrolled .nav-links a:link,
+.site-header--scrolled .nav-links a:visited {
+  color: var(--grey-600);
+}
+
+.site-header--scrolled .nav-links a:active {
+  color: var(--black);
+}
+
+.site-header .logo:link,
+.site-header .logo:visited {
+  color: var(--white);
+}
+
+.site-header .logo:active {
+  color: var(--white);
+}
+
+.site-header--scrolled .logo:link,
+.site-header--scrolled .logo:visited,
+.site-header--scrolled .logo:active {
+  color: var(--black);
+}
+
+.site-header a,
+.mobile-nav a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-links a:focus-visible,
+.site-header .logo:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 4px;
+}
+
+.site-header--scrolled .nav-links a:focus-visible,
+.site-header--scrolled .logo:focus-visible {
+  outline-color: var(--black);
+}
+
+.mobile-nav a:link,
+.mobile-nav a:visited,
+.mobile-nav a:active {
+  color: var(--white);
+}
+
+.mobile-nav a:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 4px;
+}
+
+.nav-cta a.btn--outline-white:link,
+.nav-cta a.btn--outline-white:visited,
+.nav-cta a.btn--outline-white:active {
+  color: var(--white);
 }
 
 .nav-cta {
@@ -2231,4 +2297,241 @@ section {
 
 .airport-faq-link a:hover {
   opacity: 0.6;
+}
+
+/* =============================================
+   AI CHATBOT WIDGET
+   ============================================= */
+
+.trouv-chat-widget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  font-family: var(--font-primary);
+}
+
+.trouv-chat-fab {
+  width: 60px;
+  height: 60px;
+  background-color: var(--black);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transition: transform var(--transition-base), background-color var(--transition-base);
+  border: none;
+  outline: none;
+}
+
+.trouv-chat-fab:hover {
+  transform: scale(1.05);
+  background-color: var(--grey-800);
+}
+
+.trouv-chat-fab svg {
+  width: 24px;
+  height: 24px;
+  color: var(--white);
+  transition: transform var(--transition-base);
+}
+
+.trouv-chat-panel {
+  position: absolute;
+  bottom: 80px;
+  right: 0;
+  width: 360px;
+  height: 550px;
+  max-height: calc(100vh - 120px);
+  background-color: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: opacity var(--transition-base), transform var(--transition-base);
+}
+
+.trouv-chat-widget.is-open .trouv-chat-panel {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.trouv-chat-widget.is-open .trouv-chat-fab svg {
+  transform: rotate(90deg) scale(0);
+}
+
+.trouv-chat-widget.is-open .trouv-chat-fab::after {
+  content: '+';
+  position: absolute;
+  color: var(--white);
+  font-size: 32px;
+  font-weight: 300;
+  transform: rotate(45deg);
+}
+
+.trouv-chat-header {
+  background-color: var(--black);
+  color: var(--white);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trouv-chat-title {
+  font-size: 1rem;
+  font-weight: var(--fw-medium);
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.trouv-chat-subtitle {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 2px 0 0;
+}
+
+.trouv-chat-close {
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.trouv-chat-close:hover {
+  opacity: 1;
+}
+
+.trouv-chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: var(--grey-50);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.trouv-msg {
+  max-width: 85%;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border-radius: 8px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.trouv-msg--bot {
+  align-self: flex-start;
+  background-color: var(--white);
+  color: var(--dark);
+  border: var(--border-light);
+  border-bottom-left-radius: 2px;
+}
+
+.trouv-msg--user {
+  align-self: flex-end;
+  background-color: var(--black);
+  color: var(--white);
+  border-bottom-right-radius: 2px;
+}
+
+.trouv-msg--loading {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 16px;
+}
+
+.trouv-msg--loading span {
+  width: 6px;
+  height: 6px;
+  background-color: var(--grey-400);
+  border-radius: 50%;
+  animation: trouvPulse 1.4s infinite ease-in-out both;
+}
+
+.trouv-msg--loading span:nth-child(1) { animation-delay: -0.32s; }
+.trouv-msg--loading span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes trouvPulse {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+.trouv-chat-input-area {
+  padding: 16px;
+  background-color: var(--white);
+  border-top: var(--border-light);
+  display: flex;
+  gap: 12px;
+}
+
+.trouv-chat-input {
+  flex: 1;
+  border: var(--border-medium);
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.trouv-chat-input:focus {
+  border-color: var(--black);
+}
+
+.trouv-chat-send {
+  background-color: var(--black);
+  color: var(--white);
+  border: none;
+  border-radius: 4px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.trouv-chat-send:hover {
+  background-color: var(--grey-800);
+}
+
+.trouv-chat-send:disabled {
+  background-color: var(--grey-300);
+  cursor: not-allowed;
+}
+
+.trouv-chat-send svg {
+  width: 18px;
+  height: 18px;
+  transform: translateX(-1px);
+}
+
+@media (max-width: 480px) {
+  .trouv-chat-widget {
+    bottom: 16px;
+    right: 16px;
+  }
+  
+  .trouv-chat-panel {
+    width: calc(100vw - 32px);
+    height: calc(100vh - 100px);
+  }
 }

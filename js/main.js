@@ -267,4 +267,132 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+
+  // ---------- AI Chatbot Widget ----------
+  initChatWidget();
+
+  function initChatWidget() {
+    // 1. Inject HTML
+    const chatHTML = `
+      <div id="trouv-chat" class="trouv-chat-widget">
+        <div class="trouv-chat-panel">
+          <div class="trouv-chat-header">
+            <div>
+              <h3 class="trouv-chat-title">Trouv Concierge</h3>
+              <p class="trouv-chat-subtitle">Quotations & Enquiries</p>
+            </div>
+            <button class="trouv-chat-close" aria-label="Close Chat">&times;</button>
+          </div>
+          <div class="trouv-chat-messages" id="trouv-chat-msgs">
+            <div class="trouv-msg trouv-msg--bot">Good day. I am the Trouv digital concierge. How may I assist you with your travel plans today?</div>
+          </div>
+          <form class="trouv-chat-input-area" id="trouv-chat-form">
+            <input type="text" id="trouv-chat-input" class="trouv-chat-input" placeholder="Enter pickup, dropoff, date..." autocomplete="off">
+            <button type="submit" class="trouv-chat-send" aria-label="Send Message" disabled>
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.01 21L23 12L2.01 3L2 10l15 2l-15 2z" fill="currentColor"/>
+              </svg>
+            </button>
+          </form>
+        </div>
+        <button class="trouv-chat-fab" id="trouv-chat-trigger" aria-label="Open Chat">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', chatHTML);
+
+    // 2. Select Elements
+    const chatWidget = document.getElementById('trouv-chat');
+    const triggerBtn = document.getElementById('trouv-chat-trigger');
+    const closeBtn = document.querySelector('.trouv-chat-close');
+    const form = document.getElementById('trouv-chat-form');
+    const input = document.getElementById('trouv-chat-input');
+    const sendBtn = document.querySelector('.trouv-chat-send');
+    const messagesArea = document.getElementById('trouv-chat-msgs');
+
+    // 3. State
+    let messages = [];
+
+    // 4. Toggle Logic
+    triggerBtn.addEventListener('click', () => {
+      chatWidget.classList.toggle('is-open');
+      if (chatWidget.classList.contains('is-open')) {
+        setTimeout(() => input.focus(), 300);
+      }
+    });
+
+    closeBtn.addEventListener('click', () => {
+      chatWidget.classList.remove('is-open');
+    });
+
+    // 5. Input validation for send button
+    input.addEventListener('input', () => {
+      sendBtn.disabled = input.value.trim().length === 0;
+    });
+
+    // 6. Messaging Logic
+    function appendMessage(text, sender) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `trouv-msg trouv-msg--${sender}`;
+      msgDiv.textContent = text;
+      messagesArea.appendChild(msgDiv);
+      scrollToBottom();
+    }
+
+    function appendLoading() {
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'trouv-msg trouv-msg--bot trouv-msg--loading';
+      loadingDiv.id = 'trouv-chat-loading';
+      loadingDiv.innerHTML = '<span></span><span></span><span></span>';
+      messagesArea.appendChild(loadingDiv);
+      scrollToBottom();
+    }
+
+    function removeLoading() {
+      const loadingDiv = document.getElementById('trouv-chat-loading');
+      if (loadingDiv) loadingDiv.remove();
+    }
+
+    function scrollToBottom() {
+      messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendMessage(text, 'user');
+      messages.push({ role: 'user', content: text });
+      
+      input.value = '';
+      sendBtn.disabled = true;
+      appendLoading();
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages })
+        });
+
+        const data = await response.json();
+        removeLoading();
+
+        if (response.ok && data.reply) {
+          appendMessage(data.reply, 'bot');
+          messages.push({ role: 'assistant', content: data.reply });
+        } else {
+          appendMessage(data.error || 'Connection error. Please try again.', 'bot');
+        }
+      } catch (error) {
+        removeLoading();
+        appendMessage('An error occurred while connecting. Please use info@trouv.co.uk.', 'bot');
+      }
+    });
+  }
 });
