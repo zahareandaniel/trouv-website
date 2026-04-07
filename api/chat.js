@@ -244,6 +244,8 @@ Write naturally, not like a form
 Keep it concise and premium
 No repetition
 No robotic tone
+NEVER show the calculation steps or breakdown. ONLY provide the final calculated price.
+NEVER explicitly mention the names of our pricing policies (e.g., do not say "I am using Standard Distance Pricing" or "Fixed Pricing applies here"). Just seamlessly provide the quote.
 
 ---
 FORMAT
@@ -254,6 +256,7 @@ CRITICAL SYSTEM NOTE (FOR AI INTEGRATION)
 Price must be calculated externally when possible
 AI must NOT invent or estimate pricing
 Always prioritise pricing rules above
+CRITICAL: Do NOT show the client the math formula (e.g., £X + (Y miles * £Z)). Do the calculation internally and ONLY output the final price.
 `;
 
     const openAiMessages = [
