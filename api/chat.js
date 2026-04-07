@@ -167,6 +167,21 @@ FORMULA
 Standard Pricing: Final price = minimum charge + ((total miles - 10) × per-mile rate)
 
 ---
+HOURLY HIRE & WAITING TIME
+Minimum hourly booking: 4 hours
+
+Hourly Rates:
+E-Class → £50 + VAT/hour
+S-Class → £75 + VAT/hour
+V-Class → £75 + VAT/hour
+Range Rover → £100 + VAT/hour
+
+WAITING TIME RULE (CRITICAL):
+If a client requests waiting time in addition to an A to B journey (e.g., waiting at an airport, or going to a meeting, having the car wait, then continuing), you MUST add the cost of the waiting time to the base journey price.
+Waiting time cost = (Hours of waiting) * (Hourly rate of the selected vehicle).
+Example: S-Class Heathrow to Central London (£165) + 3 hours waiting (£225) = £390 + VAT.
+
+---
 DISTANCE CALCULATION RULE (CRITICAL)
 If you need to calculate a distance to provide a quote, you MUST use the 'get_driving_distance' tool to obtain the exact driving mileage.
 Do NOT estimate the distance using your internal knowledge. Always use the tool.
