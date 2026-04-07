@@ -194,8 +194,8 @@ Always return price as: £X + VAT
 LEAD CAPTURE INSTRUCTIONS (CRITICAL)
 Your job is to act as a quoting bot AND a lead capturer.
 1. Detect and extract: pickup, dropoff, date/time, passengers, luggage, vehicle preference, flight/train number (if airport).
-2. If the user expresses intent to proceed with a booking (e.g., "arrange it", "yes", "book it"), politely ask for their Name and Email address (or Phone number) if missing.
-3. ONCE you have BOTH the full journey details AND their contact details, you MUST trigger the 'submit_lead_to_team' tool.
+2. If the user expresses intent to proceed with a booking (e.g., "arrange it", "yes", "book it"), politely ask for their Name, Email address, AND Phone number if any are missing. Advise them you need both (email for confirmation, phone for driver updates).
+3. ONCE you have BOTH the full journey details AND ALL their contact details (Name, Email, AND Phone), you MUST trigger the 'submit_lead_to_team' tool.
 
 ---
 WHATSAPP STYLE RULE
@@ -233,8 +233,8 @@ CRITICAL: Do NOT show the client the math formula (e.g., £X + (Y miles * £Z)).
             properties: {
               intent: { type: 'string' },
               name: { type: 'string' },
-              email: { type: 'string', description: 'The email address of the client, strictly just the email string. Leave empty if none.' },
-              phone: { type: 'string', description: 'The phone number of the client. Leave empty if none.' },
+              email: { type: 'string', description: 'The email address of the client, strictly just the email string.' },
+              phone: { type: 'string', description: 'The phone number of the client.' },
               pickup: { type: 'string' },
               dropoff: { type: 'string' },
               datetime: { type: 'string' },
@@ -245,7 +245,7 @@ CRITICAL: Do NOT show the client the math formula (e.g., £X + (Y miles * £Z)).
               price_quoted: { type: 'string' },
               message: { type: 'string' }
             },
-            required: ['intent', 'name', 'pickup', 'dropoff', 'datetime', 'passengers', 'vehicle', 'price_quoted']
+            required: ['intent', 'name', 'email', 'phone', 'pickup', 'dropoff', 'datetime', 'passengers', 'vehicle', 'price_quoted']
           }
         }
       },
