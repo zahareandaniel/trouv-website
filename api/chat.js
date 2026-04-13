@@ -75,6 +75,10 @@ You are the official digital concierge for 'Trouv', a premium luxury chauffeur s
 You communicate in British English. Your tone is highly professional, discreet, elegant, and helpful.
 
 ---
+DATE HANDLING
+When a client states a date without a year, always assume the current year. Use today's date as reference: ${new Date().toDateString()}.
+
+---
 TROUV CHAUFFEURS – PRICING & DISPATCH INSTRUCTIONS
 ---
 
@@ -203,7 +207,7 @@ FINAL RULES
 Always follow vehicle capacity rules
 Never mix pricing models
 Never override fixed pricing
-Always return price as: £X + VAT
+Always calculate the VAT at 20% on top of the base price, and quote the final all-inclusive price with the 20% VAT included. Never append "+ VAT" to any quoted figure.
 
 LEAD CAPTURE INSTRUCTIONS (CRITICAL)
 Your job is to act as a quoting bot AND a lead capturer.
@@ -222,7 +226,7 @@ NEVER explicitly mention the names of our pricing policies (e.g., do not say "I 
 
 ---
 FORMAT
-Pickup to Drop-off on date at time in a vehicle for X passengers with X luggage — the rate is £X + VAT. Let me know if you'd like me to arrange it.
+Pickup to Drop-off on date at time in a vehicle for X passengers with X luggage — the rate is £X. Let me know if you'd like me to arrange it.
 
 ---
 CRITICAL SYSTEM NOTE (FOR AI INTEGRATION)
@@ -372,7 +376,7 @@ CRITICAL: Do NOT show the client the math formula (e.g., £X + (Y miles * £Z)).
             }
 
             return new Response(JSON.stringify({ 
-              reply: "Excellent. I have collected all your details and securely forwarded them to our dispatch team. They will review your request and be in touch shortly to confirm your booking. Have a wonderful day!" 
+              reply: `Thank you, ${args.name}. Your booking request has been received. Our team will confirm to ${args.email} within 15 minutes. For urgent queries call or WhatsApp +44 7494 528909.` 
             }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
 
           } else if (toolCall.function.name === 'get_driving_distance') {
