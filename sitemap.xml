@@ -11,43 +11,43 @@
 
   <!-- Core service pages -->
   <url>
-    <loc>https://www.trouv.co.uk/airport-transfers.html</loc>
+    <loc>https://www.trouv.co.uk/airport-transfers/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/corporate-services.html</loc>
+    <loc>https://www.trouv.co.uk/corporate-services/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/fashion-luxury.html</loc>
+    <loc>https://www.trouv.co.uk/fashion-luxury/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/point-to-point.html</loc>
+    <loc>https://www.trouv.co.uk/point-to-point/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/hourly-hire.html</loc>
+    <loc>https://www.trouv.co.uk/hourly-hire/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/vip-travel.html</loc>
+    <loc>https://www.trouv.co.uk/vip-travel/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/fleet.html</loc>
+    <loc>https://www.trouv.co.uk/fleet/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -55,49 +55,49 @@
 
   <!-- Airport pages -->
   <url>
-    <loc>https://www.trouv.co.uk/heathrow.html</loc>
+    <loc>https://www.trouv.co.uk/heathrow/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/gatwick.html</loc>
+    <loc>https://www.trouv.co.uk/gatwick/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/stansted.html</loc>
+    <loc>https://www.trouv.co.uk/stansted/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/luton.html</loc>
+    <loc>https://www.trouv.co.uk/luton/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/london-city.html</loc>
+    <loc>https://www.trouv.co.uk/london-city/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/farnborough.html</loc>
+    <loc>https://www.trouv.co.uk/farnborough/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/biggin-hill.html</loc>
+    <loc>https://www.trouv.co.uk/biggin-hill/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/raf-northolt.html</loc>
+    <loc>https://www.trouv.co.uk/raf-northolt/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -105,19 +105,19 @@
 
   <!-- Company pages -->
   <url>
-    <loc>https://www.trouv.co.uk/about.html</loc>
+    <loc>https://www.trouv.co.uk/about/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/contact.html</loc>
+    <loc>https://www.trouv.co.uk/contact/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/faq.html</loc>
+    <loc>https://www.trouv.co.uk/faq/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -125,31 +125,31 @@
 
   <!-- Blog -->
   <url>
-    <loc>https://www.trouv.co.uk/blog.html</loc>
+    <loc>https://www.trouv.co.uk/blog/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/blog-chauffeur-vs-taxi.html</loc>
+    <loc>https://www.trouv.co.uk/blog-chauffeur-vs-taxi/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/blog-royal-ascot.html</loc>
+    <loc>https://www.trouv.co.uk/blog-royal-ascot/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/blog-f1-silverstone.html</loc>
+    <loc>https://www.trouv.co.uk/blog-f1-silverstone/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/blog-private-aviation.html</loc>
+    <loc>https://www.trouv.co.uk/blog-private-aviation/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
@@ -157,25 +157,25 @@
 
   <!-- Legal pages -->
   <url>
-    <loc>https://www.trouv.co.uk/terms.html</loc>
+    <loc>https://www.trouv.co.uk/terms/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/privacy.html</loc>
+    <loc>https://www.trouv.co.uk/privacy/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/cookies.html</loc>
+    <loc>https://www.trouv.co.uk/cookies/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.trouv.co.uk/cancellation-policy.html</loc>
+    <loc>https://www.trouv.co.uk/cancellation-policy/</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
