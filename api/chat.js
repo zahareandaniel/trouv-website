@@ -11,12 +11,22 @@ const redis =
       })
     : null;
 
-const ratelimit =
+// 3 requests per 5 hours per IP
+const ratelimit5h =
   redis &&
   new Ratelimit({
     redis,
-    limiter: Ratelimit.fixedWindow(3, '1 h'),
-    prefix: 'ratelimit:chat',
+    limiter: Ratelimit.fixedWindow(3, '5 h'),
+    prefix: 'ratelimit:chat:5h',
+  });
+
+// 5 requests per 24 hours per IP
+const ratelimitDay =
+  redis &&
+  new Ratelimit({
+    redis,
+    limiter: Ratelimit.fixedWindow(5, '24 h'),
+    prefix: 'ratelimit:chat:day',
   });
 
 function corsHeaders(origin) {
@@ -298,11 +308,24 @@ export default async function handler(req) {
     });
   }
 
-  if (ratelimit) {
+  if (ratelimit5h && ratelimitDay) {
     const ip = getClientIp(req);
-    const { success } = await ratelimit.limit(ip);
 
-    if (!success) {
+    // Check daily limit first — if exceeded, don't consume the 5h token
+    const resDay = await ratelimitDay.limit(ip);
+    if (!resDay.success) {
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        {
+          status: 429,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+        }
+      );
+    }
+
+    // Daily limit passed — now check the 5-hour window
+    const res5h = await ratelimit5h.limit(ip);
+    if (!res5h.success) {
       return new Response(
         JSON.stringify({ error: 'Too many requests. Please try again later.' }),
         {
