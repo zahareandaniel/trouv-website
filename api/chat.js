@@ -511,7 +511,7 @@ Would you like me to arrange this for you?
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini',
+          model: 'gpt-5.4-mini',
           messages: currentMessages,
           tools: tools,
           tool_choice: 'auto',
@@ -637,9 +637,17 @@ Would you like me to arrange this for you?
 
   } catch (error) {
     console.error('Chat API Error:', error);
+    
+    let errorMsg = 'We are currently unable to connect to our quoting system. Please email info@trouv.co.uk.';
+    if (error.message.includes('OpenAI API error: 429')) {
+      errorMsg = 'Our quoting system is currently experiencing high demand. Please try again in a minute or contact us directly.';
+    } else if (error.message.includes('OpenAI API error')) {
+      errorMsg = 'Our AI provider is currently unavailable. Please email info@trouv.co.uk.';
+    }
+
     return new Response(
       JSON.stringify({
-        error: 'We are currently unable to connect to our quoting system. Please email info@trouv.co.uk.',
+        error: errorMsg,
       }),
       {
         status: 500,
