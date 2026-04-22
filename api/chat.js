@@ -1,4 +1,23 @@
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
 export const config = { runtime: 'edge' };
+
+const redis =
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    ? new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      })
+    : null;
+
+const ratelimit =
+  redis &&
+  new Ratelimit({
+    redis,
+    limiter: Ratelimit.fixedWindow(3, '1 h'),
+    prefix: 'ratelimit:chat',
+  });
 
 function corsHeaders(origin) {
   const o = origin || '';
@@ -25,6 +44,20 @@ function esc(s) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function getClientIp(req) {
+  const xff = req.headers?.get?.('x-forwarded-for');
+  if (xff) {
+    return xff.split(',')[0].trim();
+  }
+
+  const realIp = req.headers?.get?.('x-real-ip');
+  if (realIp) {
+    return realIp.trim();
+  }
+
+  return 'unknown';
 }
 
 // ── Airport detection ──
@@ -255,6 +288,29 @@ export default async function handler(req) {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: corsHeaders(origin) });
+  }
+
+  const ua = (req.headers.get('user-agent') || '').toLowerCase();
+  if (ua.includes('w3st-recon') || ua.includes('contact-flood') || ua.includes('trouv-loop')) {
+    return new Response(JSON.stringify({ error: 'Forbidden' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+    });
+  }
+
+  if (ratelimit) {
+    const ip = getClientIp(req);
+    const { success } = await ratelimit.limit(ip);
+
+    if (!success) {
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please try again later.' }),
+        {
+          status: 429,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+        }
+      );
+    }
   }
 
   if (req.method !== 'POST') {
