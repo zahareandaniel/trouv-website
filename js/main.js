@@ -380,17 +380,31 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify({ messages })
         });
 
-        const data = await response.json();
         removeLoading();
+
+        // Parse JSON safely — API may return an HTML error page on crash
+        let data;
+        try {
+          data = await response.json();
+        } catch {
+          console.error('[Trouv Chat] Non-JSON response from /api/chat. Status:', response.status);
+          appendMessage('Our quoting system is temporarily unavailable. Please contact us at info@trouv.co.uk or call +44 7494 528909.', 'bot');
+          sendBtn.disabled = false;
+          return;
+        }
 
         if (response.ok && data.reply) {
           appendMessage(data.reply, 'bot');
           messages.push({ role: 'assistant', content: data.reply });
+        } else if (response.status === 429) {
+          appendMessage('You have reached the request limit. Please try again in a few hours, or contact us directly on +44 7494 528909.', 'bot');
         } else {
+          console.error('[Trouv Chat] API error. Status:', response.status, 'Body:', data);
           appendMessage(data.error || 'Connection error. Please try again.', 'bot');
         }
       } catch (error) {
         removeLoading();
+        console.error('[Trouv Chat] Fetch failed:', error);
         appendMessage('An error occurred while connecting. Please use info@trouv.co.uk.', 'bot');
       }
     });

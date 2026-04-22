@@ -3,31 +3,41 @@ import { Redis } from '@upstash/redis';
 
 export const config = { runtime: 'edge' };
 
-const redis =
-  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
-    ? new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
-      })
-    : null;
+let redis = null;
+try {
+  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+    redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    });
+  }
+} catch (e) {
+  console.error('[Trouv] Redis init failed:', e);
+  redis = null;
+}
 
-// 3 requests per 5 hours per IP
-const ratelimit5h =
-  redis &&
-  new Ratelimit({
-    redis,
-    limiter: Ratelimit.fixedWindow(3, '5 h'),
-    prefix: 'ratelimit:chat:5h',
-  });
-
-// 5 requests per 24 hours per IP
-const ratelimitDay =
-  redis &&
-  new Ratelimit({
-    redis,
-    limiter: Ratelimit.fixedWindow(5, '24 h'),
-    prefix: 'ratelimit:chat:day',
-  });
+// 3 requests per 5 hours per IP + 5 per day
+// Wrapped in try/catch so an Upstash init failure never crashes the whole function
+let ratelimit5h = null;
+let ratelimitDay = null;
+try {
+  if (redis) {
+    ratelimit5h = new Ratelimit({
+      redis,
+      limiter: Ratelimit.fixedWindow(3, '5 h'),
+      prefix: 'ratelimit:chat:5h',
+    });
+    ratelimitDay = new Ratelimit({
+      redis,
+      limiter: Ratelimit.fixedWindow(5, '24 h'),
+      prefix: 'ratelimit:chat:day',
+    });
+  }
+} catch (e) {
+  console.error('[Trouv] Rate-limit init failed — running without rate limiting:', e);
+  ratelimit5h = null;
+  ratelimitDay = null;
+}
 
 function corsHeaders(origin) {
   const o = origin || '';
