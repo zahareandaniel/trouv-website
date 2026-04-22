@@ -511,7 +511,7 @@ Would you like me to arrange this for you?
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: 'gpt-5.4-mini',
+          model: 'gpt-4o',
           messages: currentMessages,
           tools: tools,
           tool_choice: 'auto',
