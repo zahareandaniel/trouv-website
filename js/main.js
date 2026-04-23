@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------- AI Chatbot Widget ----------
-  initChatWidget();
+  // initChatWidget(); // Temporarily disabled
 
   function initChatWidget() {
     // 1. Inject HTML
