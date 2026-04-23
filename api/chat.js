@@ -17,9 +17,11 @@ try {
 }
 
 // 3 requests per 5 hours per IP + 5 per day
+// 1 lead email per IP per hour (protects Resend quota from abuse)
 // Wrapped in try/catch so an Upstash init failure never crashes the whole function
 let ratelimit5h = null;
 let ratelimitDay = null;
+let ratelimitEmail = null;
 try {
   if (redis) {
     ratelimit5h = new Ratelimit({
@@ -32,11 +34,17 @@ try {
       limiter: Ratelimit.fixedWindow(5, '24 h'),
       prefix: 'ratelimit:chat:day',
     });
+    ratelimitEmail = new Ratelimit({
+      redis,
+      limiter: Ratelimit.fixedWindow(1, '1 h'),
+      prefix: 'ratelimit:email:1h',
+    });
   }
 } catch (e) {
   console.error('[Trouv] Rate-limit init failed — running without rate limiting:', e);
   ratelimit5h = null;
   ratelimitDay = null;
+  ratelimitEmail = null;
 }
 
 function corsHeaders(origin) {
@@ -318,6 +326,25 @@ export default async function handler(req) {
     });
   }
 
+  // ── Country allowlist — Europe only ──
+  const ALLOWED_COUNTRIES = new Set([
+    // Europe
+    'GB','IE','FR','DE','IT','ES','PT','NL','BE','LU','CH','AT','DK','SE','NO','FI',
+    'IS','GR','CY','MT','PL','CZ','SK','HU','RO','BG','HR','SI','EE','LV','LT',
+    'AL','BA','ME','MK','RS','MD','UA','BY','RU','SM','MC','LI','AD','VA','XK',
+    // Middle East
+    'AE','SA','QA','KW','BH','OM','JO','LB','IL','IQ','TR','EG','YE','SY','IR','PS',
+    // USA
+    'US',
+  ]);
+  const countryCode = req.headers.get('x-vercel-ip-country') || '';
+  if (countryCode && !ALLOWED_COUNTRIES.has(countryCode.toUpperCase())) {
+    return new Response(JSON.stringify({ error: 'Service not available in your region.' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+    });
+  }
+
   if (ratelimit5h && ratelimitDay) {
     const ip = getClientIp(req);
 
@@ -566,9 +593,45 @@ Would you like me to arrange this for you?
             const args = JSON.parse(toolCall.function.arguments);
 
             if (!resendApiKey || !fromEmail) {
-              return new Response(JSON.stringify({ 
-                reply: "Thank you for confirming. However, our email system is not currently configured, so I could not forward your request. Please email us directly at info@trouv.co.uk." 
+              return new Response(JSON.stringify({
+                reply: "Thank you for confirming. However, our email system is not currently configured, so I could not forward your request. Please email us directly at info@trouv.co.uk."
               }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
+            }
+
+            // ── Lead validation — reject obviously fake contact details ──
+            const emailTrimmed = (args.email || '').trim().toLowerCase();
+            const nameTrimmed  = (args.name  || '').trim().toLowerCase();
+            const phoneTrimmed = (args.phone || '').trim();
+
+            // Basic format checks
+            const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed);
+            const phoneOk = phoneTrimmed.replace(/\D/g, '').length >= 7;
+
+            // Reserved / non-deliverable TLDs (RFC 2606 + IANA special-use)
+            const fakeTlds = ['.example', '.test', '.invalid', '.localhost', '.local', '.internal', '.fake'];
+            const hasFakeTld = fakeTlds.some(t => emailTrimmed.endsWith(t));
+
+            // Known attacker domain/name patterns
+            const blockedPatterns = ['w3st', 'contact-flood', 'trouv-loop'];
+            const hasBlockedPattern = blockedPatterns.some(p => emailTrimmed.includes(p) || nameTrimmed.includes(p));
+
+            if (!emailOk || !phoneOk || hasFakeTld || hasBlockedPattern) {
+              console.warn('[Trouv] Lead rejected — invalid or blocked contact details:', { email: emailTrimmed, name: nameTrimmed });
+              return new Response(JSON.stringify({
+                reply: "I'm sorry, but the contact details provided don't appear to be valid. Could you please double-check your email address and phone number?"
+              }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
+            }
+
+            // ── Per-IP email rate limit (1 lead per hour) ──
+            if (ratelimitEmail) {
+              const ip = getClientIp(req);
+              const resEmail1h = await ratelimitEmail.limit(ip);
+              if (!resEmail1h.success) {
+                console.warn('[Trouv] Email rate limit hit for IP:', ip);
+                return new Response(JSON.stringify({
+                  reply: "Your booking details have been noted. Please contact us directly on +44 7494 528909 or via WhatsApp to confirm your reservation immediately."
+                }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
+              }
             }
 
             // Build conversation transcript
@@ -610,10 +673,15 @@ Would you like me to arrange this for you?
             });
 
             if (!resEmail.ok) {
-              console.error("Resend delivery failed", await resEmail.text());
-              return new Response(JSON.stringify({ 
-                reply: "Your details have been collected, but there was an issue reaching our dispatch. Please email info@trouv.co.uk so we do not miss your request." 
-              }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
+              const resendBody = await resEmail.text();
+              console.error('[Trouv] Resend delivery failed', resEmail.status, resendBody);
+              const replyMsg = resEmail.status === 429
+                ? "Our notification system has reached its daily limit due to high demand. Please contact us directly on +44 7494 528909 or WhatsApp and quote your name — we have your details."
+                : "Your details have been collected, but there was an issue reaching our dispatch. Please email info@trouv.co.uk so we do not miss your request.";
+              return new Response(JSON.stringify({ reply: replyMsg }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+              });
             }
 
             return new Response(JSON.stringify({ 
