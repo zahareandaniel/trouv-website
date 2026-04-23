@@ -353,6 +353,33 @@ export default async function handler(req) {
     });
   }
 
+  // ── IPQualityScore VPN / proxy detection ──
+  const ipqsKey = process.env.IPQS_API_KEY;
+  if (ipqsKey) {
+    try {
+      const ipToCheck = getClientIp(req);
+      if (ipToCheck && ipToCheck !== 'unknown') {
+        const ipqsRes = await fetch(
+          `https://ipqualityscore.com/api/json/ip/${ipqsKey}/${encodeURIComponent(ipToCheck)}?strictness=1&allow_public_access_points=false`
+        );
+        if (ipqsRes.ok) {
+          const ipqsData = await ipqsRes.json();
+          if (ipqsData.success && (ipqsData.vpn === true || ipqsData.proxy === true)) {
+            return new Response(JSON.stringify({ error: 'Forbidden' }), {
+              status: 403,
+              headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+            });
+          }
+        } else {
+          console.error('[Trouv] IPQS request failed:', ipqsRes.status);
+        }
+      }
+    } catch (e) {
+      console.error('[Trouv] IPQS check error:', e);
+      // Fail open — do not block legitimate users if IPQS is unreachable
+    }
+  }
+
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     return new Response(
