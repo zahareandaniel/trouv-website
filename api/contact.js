@@ -74,6 +74,46 @@ export default async function handler(req) {
     });
   }
 
+  // ── Country allowlist — Europe, Middle East, USA only ──
+  const ALLOWED_COUNTRIES = new Set([
+    'GB','IE','FR','DE','IT','ES','PT','NL','BE','LU','CH','AT','DK','SE','NO','FI',
+    'IS','GR','CY','MT','PL','CZ','SK','HU','RO','BG','HR','SI','EE','LV','LT',
+    'AL','BA','ME','MK','RS','MD','UA','BY','RU','SM','MC','LI','AD','VA','XK',
+    'AE','SA','QA','KW','BH','OM','JO','LB','IL','IQ','TR','EG','YE','SY','IR','PS',
+    'US',
+  ]);
+  const countryCode = req.headers.get('x-vercel-ip-country') || '';
+  if (countryCode && !ALLOWED_COUNTRIES.has(countryCode.toUpperCase())) {
+    return new Response(JSON.stringify({ error: 'Service not available in your region.' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+    });
+  }
+
+  // ── IPQualityScore VPN / proxy detection ──
+  const ipqsKey = process.env.IPQS_API_KEY;
+  if (ipqsKey) {
+    try {
+      const ipToCheck = getClientIp(req);
+      if (ipToCheck && ipToCheck !== 'unknown') {
+        const ipqsRes = await fetch(
+          `https://ipqualityscore.com/api/json/ip/${ipqsKey}/${encodeURIComponent(ipToCheck)}?strictness=1&allow_public_access_points=false`
+        );
+        if (ipqsRes.ok) {
+          const ipqsData = await ipqsRes.json();
+          if (ipqsData.success && (ipqsData.vpn === true || ipqsData.proxy === true)) {
+            return new Response(JSON.stringify({ error: 'Forbidden' }), {
+              status: 403,
+              headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.error('[Trouv] IPQS check error (contact):', e);
+    }
+  }
+
   if (ratelimit) {
     const ip = getClientIp(req);
     const { success } = await ratelimit.limit(ip);
@@ -148,6 +188,26 @@ export default async function handler(req) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return new Response(JSON.stringify({ error: 'Invalid email' }), {
       status: 400,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
+    });
+  }
+
+  // ── Fake TLD / blocked pattern check ──
+  const emailLower = email.toLowerCase();
+  const nameLower  = name.toLowerCase();
+  const fakeTlds = ['.example', '.test', '.invalid', '.localhost', '.local', '.internal', '.fake'];
+  const blockedPatterns = ['w3st', 'contact-flood', 'trouv-loop'];
+  const isOfcom = phone.replace(/\D/g, '').startsWith('447700900') || phone.replace(/\D/g, '').startsWith('07700900');
+  if (
+    fakeTlds.some(t => emailLower.endsWith(t)) ||
+    blockedPatterns.some(p => emailLower.includes(p) || nameLower.includes(p)) ||
+    isOfcom
+  ) {
+    // Honeypot — fake success, log everything
+    console.warn(`[TRAP:contact] IP: ${getClientIp(req)} | Name: ${name} | Email: ${email} | Phone: ${phone}`);
+    await new Promise(r => setTimeout(r, 5000));
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
     });
   }
