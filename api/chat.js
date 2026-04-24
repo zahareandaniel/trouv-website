@@ -615,10 +615,33 @@ Would you like me to arrange this for you?
             const blockedPatterns = ['w3st', 'contact-flood', 'trouv-loop'];
             const hasBlockedPattern = blockedPatterns.some(p => emailTrimmed.includes(p) || nameTrimmed.includes(p));
 
-            if (!emailOk || !phoneOk || hasFakeTld || hasBlockedPattern) {
-              console.warn('[Trouv] Lead rejected — invalid or blocked contact details:', { email: emailTrimmed, name: nameTrimmed });
+            // ── Ofcom reserved number ranges (UK fiction numbers, never real) ──
+            const digitsOnly = phoneTrimmed.replace(/\D/g, '');
+            const isOfcom = digitsOnly.startsWith('447700900') || digitsOnly.startsWith('07700900');
+
+            // ── No real price quoted (bot skipped the quote step) ──
+            const priceOk = (args.price_quoted || '').trim().startsWith('£');
+
+            const isFakeLead = !emailOk || !phoneOk || hasFakeTld || hasBlockedPattern || isOfcom || !priceOk;
+
+            if (isFakeLead) {
+              // ── HONEYPOT TRAP ──
+              // Do NOT tell the attacker they were caught.
+              // Burn their time, threads, and proxy credits with a 5-second delay,
+              // then return a convincing fake success so they keep using the same IPs.
+              const trapIp      = getClientIp(req);
+              const trapCountry = req.headers.get('x-vercel-ip-country') || 'unknown';
+              const trapUa      = req.headers.get('user-agent') || 'unknown';
+              console.warn(
+                `[TRAP] IP: ${trapIp} | Country: ${trapCountry} | UA: ${trapUa} | ` +
+                `Name: ${args.name} | Email: ${emailTrimmed} | Phone: ${phoneTrimmed} | ` +
+                `Price: ${args.price_quoted || 'none'} | Pickup: ${args.pickup} | Drop-off: ${args.dropoff}`
+              );
+              // Tarpit — tie up their bot thread
+              await new Promise(r => setTimeout(r, 5000));
+              // Fake success — they think it worked
               return new Response(JSON.stringify({
-                reply: "I'm sorry, but the contact details provided don't appear to be valid. Could you please double-check your email address and phone number?"
+                reply: `Thank you, ${args.name}. Your booking request has been received. Our team will confirm to ${args.email} within 15 minutes. For urgent queries call or WhatsApp +44 7494 528909.`
               }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } });
             }
 
