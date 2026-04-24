@@ -269,7 +269,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------- AI Chatbot Widget ----------
-  initChatWidget();
+  // Temporarily disabled — re-enable by uncommenting the line below
+  // initChatWidget();
 
 
   function initChatWidget() {
